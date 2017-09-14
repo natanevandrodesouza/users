@@ -1,5 +1,7 @@
 #README
+
 -Necessario dar um composer install em todas dependencias
+
 -Configurar banco de dados conforme seu ambiente. Utilieza o .sql que está na pasta BD.
 
 Modo de teste:
@@ -24,7 +26,7 @@ Cole o seguinte json no campo abaixo: (Que é um usuario já existente no bd).
 
 -Com ele, será obrigado gerar um token indo para:
 
-	POST -> http://localhost/teste/generate-token (necessario configurar conforme seu ambiente)
+	METHOD POST -> http://localhost/teste/generate-token (necessario configurar conforme seu ambiente)
 
 -Ele verificará se existe o mesmo existe no banco de dados para gerar token. (Sistema de login).
 
