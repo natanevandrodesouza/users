@@ -73,7 +73,7 @@ $app->post('/generate-token', function () use ($app) {
     $data = json_decode(file_get_contents('php://input'), true);
     $db = $app['connection'];
     
-    $sql = "SELECT * FROM users where id='".$data['id']."'";
+    $sql = "SELECT * FROM users where username='".$data['username']."'";
     $stmt = $db->query($sql);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -103,31 +103,34 @@ $app->get('/users', function(Request $request) use ($app){
 
 	$sql = 'SELECT * FROM users';
 
-	 try {
+	try {
         /* @var $db PDO */
         $db = $app['connection'];
         $stmt = $db->query($sql);
-        $retorno = $stmt->fetchAll(PDO::FETCH_OBJ);
-        $db = null;
+        $return = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-        return new JsonResponse($retorno);
+        return new JsonResponse($return);
+        
     } catch(\PDOException $e) {
+        return new Response(400, ['message' => $e->getMessage()]);
     };
 
 });
 
 $app->get('users/{id}', function($id) use ($app){
+
 	$sql = "SELECT * FROM users where id='".$id."'";
+
     try {
         /* @var $db PDO */
         $db = $app['connection'];
         $stmt = $db->query($sql);
-        $retorno = $stmt->fetch(PDO::FETCH_OBJ);
-        $db = null;
+        $return = $stmt->fetch(PDO::FETCH_OBJ);
         
-        return new JsonResponse($retorno);
+        return new JsonResponse($return);
+
     } catch(\PDOException $e) {
-        echo '{"error":{"text":'. $e->getMessage() .'}}';
+        return new Response(400, ['message' => $e->getMessage()]);    
     }
 
 });
@@ -151,6 +154,7 @@ $app->post('/users', function(Request $request) use ($app){
         $stmt->execute();
         
         return new Response();
+
     } catch(\PDOException $e) {
         return new Response(400, ['message' => $e->getMessage()]);
     }
@@ -163,23 +167,21 @@ $app->put('/users', function(Request $request) use ($app){
     $hash = password_hash($data['password'], PASSWORD_DEFAULT);
     $sql = "UPDATE users SET name= ?, username = ?, password = ?, address = ? WHERE id = ?";
 
-        try {
-            /* @var $db PDO */
-            $db = $app['connection'];
-            $stmt = $db->prepare($sql);
-            $paramOrder = 1;
+    try {
+        /* @var $db PDO */
+        $db = $app['connection'];
+        $stmt = $db->prepare($sql);
+        $paramOrder = 1;
 
-            $stmt->bindParam($paramOrder++, $data['name']);
-            $stmt->bindParam($paramOrder++, $data['username']);
-            $stmt->bindParam($paramOrder++, $hash);
-            $stmt->bindParam($paramOrder++, $data['address']);
-            $stmt->bindParam($paramOrder++, $data['id']);
+        $stmt->bindParam($paramOrder++, $data['name']);
+        $stmt->bindParam($paramOrder++, $data['username']);
+        $stmt->bindParam($paramOrder++, $hash);
+        $stmt->bindParam($paramOrder++, $data['address']);
+        $stmt->bindParam($paramOrder++, $data['id']);
 
-            $stmt->execute();
+        $stmt->execute();
 
-            $db = null;
-
-            return new Response();
+        return new Response();
 
     } catch(\PDOException $e) {
         return new Response(400, ['message' => $e->getMessage()]);
@@ -190,18 +192,17 @@ $app->delete('/users/{id}', function($id) use ($app){
     $sql = 'DELETE FROM users WHERE id = ?';
 
     try {
-         /* @var $db PDO */
-         $db = $app['connection'];
-         $stmt = $db->prepare($sql);
-         $paramOrder = 1;
+        /* @var $db PDO */
+        $db = $app['connection'];
+        $stmt = $db->prepare($sql);
+        $paramOrder = 1;
 
-         $stmt->bindParam($paramOrder++, $id);
+        $stmt->bindParam($paramOrder++, $id);
 
-         $stmt->execute();
+        $stmt->execute();
 
-         $db = null;
+        return new Response();
 
-         return new Response();
     } catch (\PDOException $e) {
         return new Response(400, ['message' => $e->getMessage()]);;
     }
